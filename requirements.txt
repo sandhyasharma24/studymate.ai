@@ -1,12 +1,7 @@
-fastapi
-uvicorn
 streamlit
-requests
-python-dotenv
 groq
-sentence-transformers
-faiss-cpu
+python-dotenv
 numpy
 pypdf
-python-multipart
-huggingface-hub
+scikit-learn
+requests

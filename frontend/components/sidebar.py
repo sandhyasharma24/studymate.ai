@@ -1,10 +1,17 @@
 import streamlit as st
-import requests
+
+from backend.services.rag_service import (
+    upload_and_index_pdf
+)
 
 
 def render_sidebar():
 
-    st.slider(
+    st.sidebar.title(
+        "⚙️ Settings"
+    )
+
+    st.sidebar.slider(
         "Number of flashcards",
         min_value=1,
         max_value=20,
@@ -12,77 +19,63 @@ def render_sidebar():
         key="num_flashcards"
     )
 
-    st.radio(
+    st.sidebar.radio(
         "Mode",
-        options=["General Mode", "PDF Mode"],
-        key="mode",
-        horizontal=True
+        options=[
+            "General Mode",
+            "PDF Mode"
+        ],
+        key="mode"
     )
 
     # ---------- PDF MODE ----------
+
     if st.session_state.mode == "PDF Mode":
 
-        st.markdown("## 📄 PDF Learning")
+        st.sidebar.markdown(
+            "### 📄 Upload PDF"
+        )
 
-        uploaded_pdf = st.file_uploader(
-            "Upload PDF",
-            type=["pdf"],
-            key="rag_pdf_upload"
+        uploaded_pdf = st.sidebar.file_uploader(
+            "Upload study material",
+            type=["pdf"]
         )
 
         if uploaded_pdf is not None:
 
-            if st.button("Index PDF"):
-
-                files = {
-                    "file": (
-                        uploaded_pdf.name,
-                        uploaded_pdf.getvalue(),
-                        "application/pdf"
-                    )
-                }
+            if st.sidebar.button(
+                "Index PDF"
+            ):
 
                 try:
 
-                    upload_response = requests.post(
-                        "http://127.0.0.1:8000/rag/upload",
-                        files=files
+                    pdf_bytes = (
+                        uploaded_pdf.read()
                     )
 
-                    if upload_response.ok:
-
-                        st.session_state.rag_ready = True
-
-                        result = upload_response.json()
-
-                        st.success(
-                            f"PDF indexed successfully. "
-                            f"Chunks indexed: "
-                            f"{result.get('chunks_indexed', 0)}"
+                    chunk_count = (
+                        upload_and_index_pdf(
+                            pdf_bytes
                         )
-
-                    else:
-
-                        st.session_state.rag_ready = False
-
-                        st.error(
-                            upload_response.json().get(
-                                "detail",
-                                "Failed to index PDF."
-                            )
-                        )
-
-                except requests.RequestException:
-
-                    st.session_state.rag_ready = False
-
-                    st.error(
-                        "Could not connect to backend."
                     )
 
-        if st.session_state.get("rag_ready"):
+                    st.session_state.rag_ready = True
 
-            st.caption(
-                "PDF indexed successfully. "
-                "All features now use document context."
+                    st.sidebar.success(
+                        f"PDF indexed successfully "
+                        f"({chunk_count} chunks)"
+                    )
+
+                except Exception as e:
+
+                    st.sidebar.error(
+                        f"Error: {str(e)}"
+                    )
+
+        if st.session_state.get(
+            "rag_ready"
+        ):
+
+            st.sidebar.success(
+                "RAG Ready ✅"
             )

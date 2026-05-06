@@ -1,5 +1,12 @@
 import streamlit as st
-import requests
+
+from backend.services.llm_service import (
+    generate
+)
+
+from backend.utils.prompt_builder import (
+    build_prompt
+)
 
 
 # ---------- QUIZ EXPLANATION ----------
@@ -13,13 +20,7 @@ def get_quiz_explanation(
 
     try:
 
-        response = requests.post(
-
-            "http://127.0.0.1:8000/generate",
-
-            json={
-
-                "topic": f"""
+        explanation_prompt = f"""
 Explain this MCQ for a student.
 
 Question:
@@ -35,24 +36,16 @@ Explain:
 - why the correct answer is right
 - why the other options are wrong
 - keep explanation concise and educational
-""",
+"""
 
-                "num_flashcards": 1,
+        explanation = generate(
 
-                "mode": mode
-            }
+            build_prompt(
+                explanation_prompt
+            )
         )
 
-        if response.ok:
-
-            data = response.json()
-
-            return data.get(
-                "answer",
-                "Explanation unavailable."
-            )
-
-        return "Explanation unavailable."
+        return explanation
 
     except Exception:
 
@@ -64,8 +57,6 @@ Explain:
 def render_quiz(quiz):
 
     st.markdown("## ❓ Quiz")
-
-    # ---------- SESSION STATE ----------
 
     if "quiz_answers" not in st.session_state:
 
@@ -110,8 +101,6 @@ def render_quiz(quiz):
 
             st.markdown("---")
 
-        # ---------- SUBMIT ----------
-
         if st.button("Submit Quiz"):
 
             st.session_state.quiz_submitted = True
@@ -142,8 +131,6 @@ def render_quiz(quiz):
 
                 selected = user[0]
 
-                # ---------- CORRECT ----------
-
                 if selected == correct:
 
                     score += 1
@@ -152,8 +139,6 @@ def render_quiz(quiz):
                         "✅ Correct"
                     )
 
-                # ---------- WRONG ----------
-
                 else:
 
                     st.error(
@@ -161,25 +146,11 @@ def render_quiz(quiz):
                         f"Correct answer: {correct}"
                     )
 
-                # ---------- EXPLANATION ----------
-
                 if (
                     i not in
                     st.session_state
                     .quiz_explanations
                 ):
-
-                    mode = (
-
-                        "pdf"
-
-                        if (
-                            st.session_state.mode
-                            == "PDF Mode"
-                        )
-
-                        else "general"
-                    )
 
                     explanation = (
                         get_quiz_explanation(
@@ -190,7 +161,7 @@ def render_quiz(quiz):
 
                             correct,
 
-                            mode
+                            "general"
                         )
                     )
 
@@ -207,18 +178,12 @@ def render_quiz(quiz):
 
             st.markdown("---")
 
-        # ---------- SCORE ----------
-
         st.session_state.quiz_score = score
 
         st.subheader(
             f"🎯 Score: "
             f"{score}/{len(quiz)}"
         )
-
-        st.write("")
-
-        # ---------- RETRY ----------
 
         if st.button("Retry Quiz"):
 
@@ -229,8 +194,6 @@ def render_quiz(quiz):
             st.session_state.quiz_score = 0
 
             st.session_state.quiz_explanations = {}
-
-            # remove radio state
 
             for idx in range(len(quiz)):
 
