@@ -1,0 +1,184 @@
+/* ---------- GLOBAL ---------- */
+
+html,
+body,
+[class*="css"] {
+    font-family: "Inter", sans-serif;
+}
+
+/* ---------- APP BACKGROUND ---------- */
+
+.stApp {
+    background: linear-gradient(
+        180deg,
+        #0F172A 0%,
+        #111827 100%
+    );
+    color: #F8FAFC;
+}
+
+/* ---------- MAIN CONTAINER ---------- */
+
+.block-container {
+    padding-top: 2rem;
+    padding-bottom: 2rem;
+    max-width: 1300px;
+}
+
+/* ---------- HERO SECTION ---------- */
+
+.hero-container {
+    padding: 2.5rem;
+    border-radius: 24px;
+    background: linear-gradient(
+        135deg,
+        rgba(139,92,246,0.18),
+        rgba(6,182,212,0.12)
+    );
+    border: 1px solid rgba(255,255,255,0.08);
+    margin-bottom: 2rem;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.25);
+}
+
+.hero-title {
+    font-size: 3.2rem;
+    font-weight: 800;
+    color: #F8FAFC;
+    margin-bottom: 0.5rem;
+}
+
+.hero-subtitle {
+    font-size: 1.1rem;
+    color: #CBD5E1;
+    line-height: 1.7;
+    max-width: 850px;
+}
+
+/* ---------- BADGES ---------- */
+
+.badge-container {
+    margin-top: 1.2rem;
+    display: flex;
+    gap: 0.7rem;
+    flex-wrap: wrap;
+}
+
+.badge {
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.08);
+    padding: 0.45rem 0.9rem;
+    border-radius: 999px;
+    color: #E2E8F0;
+    font-size: 0.92rem;
+    font-weight: 600;
+}
+
+/* ---------- TABS ---------- */
+
+.stTabs [data-baseweb="tab-list"] {
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.stTabs [data-baseweb="tab"] {
+    background: #111827;
+    border-radius: 12px;
+    padding: 0.7rem 1.2rem;
+    color: #CBD5E1;
+    border: 1px solid rgba(255,255,255,0.06);
+}
+
+.stTabs [aria-selected="true"] {
+    background: #8B5CF6 !important;
+    color: white !important;
+}
+
+/* ---------- BUTTONS ---------- */
+
+.stButton button {
+    background: linear-gradient(
+        135deg,
+        #8B5CF6,
+        #06B6D4
+    );
+    color: white;
+    border: none;
+    border-radius: 12px;
+    padding: 0.6rem 1rem;
+    font-weight: 700;
+    transition: all 0.25s ease;
+}
+
+.stButton button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(139,92,246,0.35);
+}
+
+/* ---------- INPUTS ---------- */
+
+.stTextInput input,
+.stTextArea textarea {
+    background: #111827 !important;
+    color: white !important;
+    border-radius: 12px !important;
+    border: 1px solid rgba(255,255,255,0.08) !important;
+}
+
+/* ---------- RADIO / QUIZ ---------- */
+
+.stRadio > div {
+    background: rgba(255,255,255,0.04);
+    padding: 1rem;
+    border-radius: 14px;
+    margin-bottom: 1rem;
+}
+
+/* ---------- SUCCESS / INFO ---------- */
+
+.stSuccess,
+.stInfo,
+.stWarning,
+.stError {
+    border-radius: 12px;
+}
+
+/* ---------- CHAT INPUT ---------- */
+
+[data-testid="stChatInput"] {
+    border-radius: 18px;
+}
+
+/* ---------- SCROLLBAR ---------- */
+
+::-webkit-scrollbar {
+    width: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #8B5CF6;
+    border-radius: 20px;
+}
+
+/* ---------- HEADERS ---------- */
+
+h1,
+h2,
+h3 {
+    color: #F8FAFC;
+}
+
+/* ---------- EXPANDERS ---------- */
+
+.streamlit-expanderHeader {
+    background: rgba(255,255,255,0.05);
+    border-radius: 10px;
+}
+
+/* ---------- FILE UPLOADER ---------- */
+
+[data-testid="stFileUploader"] {
+    background: rgba(255,255,255,0.04);
+    border-radius: 14px;
+    padding: 1rem;
+    border: 1px solid rgba(255,255,255,0.06);
+}
