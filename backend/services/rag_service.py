@@ -1,76 +1,91 @@
-from sentence_transformers import SentenceTransformer
-from fastapi import HTTPException
 from pypdf import PdfReader
-from io import BytesIO
 
-import numpy as np
-import faiss
-
-from backend.utils.chunking import (
-    split_text_into_chunks
+from sklearn.feature_extraction.text import (
+    TfidfVectorizer
 )
 
-# ---------- EMBEDDING MODEL ----------
-
-embedding_model = SentenceTransformer(
-    "all-MiniLM-L6-v2"
+from sklearn.metrics.pairwise import (
+    cosine_similarity
 )
+
+import tempfile
 
 # ---------- GLOBAL STORAGE ----------
 
-rag_index = None
+stored_chunks = []
 
-rag_chunks = []
+vectorizer = TfidfVectorizer()
 
+chunk_vectors = None
+
+# ---------- TEXT SPLITTER ----------
+
+def split_text(
+    text,
+    chunk_size=500
+):
+
+    chunks = []
+
+    for i in range(
+        0,
+        len(text),
+        chunk_size
+    ):
+
+        chunks.append(
+            text[i:i + chunk_size]
+        )
+
+    return chunks
 
 # ---------- PDF INDEXING ----------
 
-def upload_and_index_pdf(pdf_bytes):
+def upload_and_index_pdf(
+    pdf_bytes
+):
 
-    global rag_index, rag_chunks
+    global stored_chunks
+    global chunk_vectors
+
+    with tempfile.NamedTemporaryFile(
+        delete=False,
+        suffix=".pdf"
+    ) as tmp_file:
+
+        tmp_file.write(pdf_bytes)
+
+        pdf_path = tmp_file.name
 
     reader = PdfReader(
-        BytesIO(pdf_bytes)
+        pdf_path
     )
 
-    extracted_text = "\n".join(
-        (
-            page.extract_text() or ""
-        )
-        for page in reader.pages
-    )
+    text = ""
 
-    chunks = split_text_into_chunks(
-        extracted_text
-    )
+    for page in reader.pages:
 
-    if not chunks:
-
-        raise HTTPException(
-            status_code=400,
-            detail="No readable text found in PDF."
+        extracted = (
+            page.extract_text()
         )
 
-    embeddings = embedding_model.encode(
-        chunks,
-        convert_to_numpy=True
+        if extracted:
+
+            text += (
+                extracted + "\n"
+            )
+
+    stored_chunks = split_text(
+        text
     )
 
-    embeddings = np.asarray(
-        embeddings,
-        dtype=np.float32
+    chunk_vectors = (
+        vectorizer.fit_transform(
+            stored_chunks
+        )
     )
 
-    rag_index = faiss.IndexFlatL2(
-        embeddings.shape[1]
-    )
-
-    rag_index.add(embeddings)
-
-    rag_chunks = chunks
-
-    return len(rag_chunks)
-
+    return len(stored_chunks)
 
 # ---------- RETRIEVAL ----------
 
@@ -79,39 +94,37 @@ def retrieve_relevant_chunks(
     top_k=5
 ):
 
-    global rag_index, rag_chunks
+    global chunk_vectors
 
-    if rag_index is None or not rag_chunks:
+    if (
+        not stored_chunks
+        or chunk_vectors is None
+    ):
 
-        raise HTTPException(
-            status_code=400,
-            detail="Please upload and index a PDF first."
+        return []
+
+    query_vector = (
+        vectorizer.transform(
+            [query]
         )
-
-    query_embedding = embedding_model.encode(
-        [query],
-        convert_to_numpy=True
     )
 
-    query_embedding = np.asarray(
-        query_embedding,
-        dtype=np.float32
+    similarities = (
+        cosine_similarity(
+            query_vector,
+            chunk_vectors
+        )[0]
     )
 
-    k = min(
-        top_k,
-        len(rag_chunks)
+    top_indices = (
+        similarities.argsort()[
+            -top_k:
+        ][::-1]
     )
 
-    _, indices = rag_index.search(
-        query_embedding,
-        k
-    )
+    return [
 
-    retrieved = [
-        rag_chunks[idx]
-        for idx in indices[0]
-        if 0 <= idx < len(rag_chunks)
+        stored_chunks[i]
+
+        for i in top_indices
     ]
-
-    return retrieved
