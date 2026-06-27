@@ -1,0 +1,28 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: studymate-config
+  namespace: studymate
+data:
+  REDIS_URL: "redis://redis-service:6379"
+  CHROMA_HOST: "chromadb-service"
+  CHROMA_PORT: "8000"
+  SPRING_REDIS_HOST: "redis-service"
+  SPRING_RABBITMQ_HOST: "rabbitmq-service"
+  AI_SERVICE_URL: "http://ai-service:8001"
+  SPRING_DATASOURCE_URL: "jdbc:postgresql://postgres-service:5432/studymate"
+
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: studymate-secrets
+  namespace: studymate
+type: Opaque
+data:
+  # Base64 encoded placeholders
+  # Generate using: echo -n 'value' | base64
+  GROQ_API_KEY: "Z3NrX3BsYWNlaG9sZGVy" # gsk_placeholder
+  HF_TOKEN: "aGZfcGxhY2Vob2xkZXI="     # hf_placeholder
+  POSTGRES_PASSWORD: "cG9zdGdyZXNfcGFzc3dvcmQ=" # postgres_password
+  JWT_SECRET: "and0X3NlY3JldF9rZXlfdmFsdWU="     # jwt_secret_key_value

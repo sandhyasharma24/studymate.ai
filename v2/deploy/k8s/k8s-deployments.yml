@@ -1,0 +1,116 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ai-service
+  namespace: studymate
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: ai-service
+  template:
+    metadata:
+      labels:
+        app: ai-service
+    spec:
+      containers:
+        - name: ai-service
+          image: studymate/studymate-ai-service:latest
+          ports:
+            - containerPort: 8001
+          env:
+            - name: REDIS_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: studymate-config
+                  key: REDIS_URL
+            - name: CHROMA_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: studymate-config
+                  key: CHROMA_HOST
+            - name: CHROMA_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: studymate-config
+                  key: CHROMA_PORT
+            - name: GROQ_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: studymate-secrets
+                  key: GROQ_API_KEY
+            - name: HF_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: studymate-secrets
+                  key: HF_TOKEN
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api-gateway
+  namespace: studymate
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: api-gateway
+  template:
+    metadata:
+      labels:
+        app: api-gateway
+    spec:
+      containers:
+        - name: api-gateway
+          image: studymate/studymate-api-gateway:latest
+          ports:
+            - containerPort: 8080
+          env:
+            - name: SPRING_DATASOURCE_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: studymate-config
+                  key: SPRING_DATASOURCE_URL
+            - name: SPRING_REDIS_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: studymate-config
+                  key: SPRING_REDIS_HOST
+            - name: SPRING_RABBITMQ_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: studymate-config
+                  key: SPRING_RABBITMQ_HOST
+            - name: AI_SERVICE_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: studymate-config
+                  key: AI_SERVICE_URL
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: studymate-secrets
+                  key: JWT_SECRET
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend
+  namespace: studymate
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: frontend
+  template:
+    metadata:
+      labels:
+        app: frontend
+    spec:
+      containers:
+        - name: frontend
+          image: studymate/studymate-frontend:latest
+          ports:
+            - containerPort: 3000

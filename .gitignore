@@ -1,6 +1,71 @@
+# IDEs and System files
+.idea/
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+.DS_Store
+
+# Virtual Environments
 venv/
+.venv/
+env/
+ENV/
+
+# Python caching
 __pycache__/
 *.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Node / Frontend Build
+node_modules/
+dist/
+.npm
+.eslintcache
+
+# Java Gateway Build
+**/target/
+*.class
+*.jar
+*.war
+*.ear
+.mvn/
+.metadata/
+.classpath
+.project
+.settings/
+
+# Databases and Storage volumes (Docker local folders)
+postgres_data/
+chroma_data/
+pdf_storage/
+v2/postgres_data/
+v2/chroma_data/
+v2/pdf_storage/
+**/postgres_data/
+**/chroma_data/
+**/pdf_storage/
+*.db
+*.sqlite
+
+# Environment variables & secrets
 .env
-.faiss/
-.DS_Store
+.env.*
+v2/.env
+v2/.env.*
+!.env.template
+
+# Logs and diagnostics
+*.log
+v2/*.log
+.system_generated/
+/logs/
+/tmp/
+temp/
+EOT
